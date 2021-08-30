@@ -1,7 +1,6 @@
 {
     "name": "zajca/symfony-extensions",
     "license": "MIT",
-    "version": "1.0.0",
     "description": "Variety extensions for symfony.",
     "type": "library",
     "authors": [
