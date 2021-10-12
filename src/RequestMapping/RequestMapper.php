@@ -13,6 +13,7 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Zajca\Extensions\RequestMapping\Domain\Attribute\SourceAttributeInterface;
 use Zajca\Extensions\RequestMapping\Domain\RequestObject\CustomMappedRequestObject;
+use Zajca\Extensions\RequestMapping\Domain\RequestObject\CustomMethodValidation;
 use Zajca\Extensions\RequestMapping\Domain\RequestObject\InvalidDataException;
 
 class RequestMapper
@@ -39,13 +40,33 @@ class RequestMapper
             $targetClass,
             $overwriteSource
         );
+
         $ref = new ReflectionClass($targetClass);
+        $usePreMappingValidation = $ref->implementsInterface(CustomMethodValidation::class);
+
+        if ($usePreMappingValidation) {
+            // pre mapping validation
+            $getConstraint = $ref->getMethod('getConstraint');
+            $violations = $this->validator->validate(
+                $data,
+                $getConstraint->invoke(null)
+            );
+            if ($violations->count() > 0) {
+                throw new InvalidDataException($violations);
+            }
+        }
+
         if ($ref->implementsInterface(CustomMappedRequestObject::class)) {
             $obj = $ref->getMethod('mapFromRequestData')->invoke(null, $data);
         } else {
             $obj = $this->denormalize($data, $targetClass);
         }
-        $this->validate($obj);
+        if (!$usePreMappingValidation) {
+            $violations = $this->validator->validate($obj);
+            if ($violations->count() > 0) {
+                throw new InvalidDataException($violations);
+            }
+        }
 
         return $obj;
     }
@@ -65,14 +86,6 @@ class RequestMapper
             return $dto;
         } catch (NotNormalizableValueException $ex) {
             throw new BadRequestHttpException($ex->getMessage());
-        }
-    }
-
-    private function validate(object $dto): void
-    {
-        $violations = $this->validator->validate($dto);
-        if ($violations->count() > 0) {
-            throw new InvalidDataException($violations);
         }
     }
 }

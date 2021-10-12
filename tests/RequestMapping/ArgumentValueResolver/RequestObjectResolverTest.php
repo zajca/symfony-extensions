@@ -519,5 +519,34 @@ class RequestObjectResolverTest extends TestCase
                 ],
             ],
         ];
+        yield 'custom method validation' => [
+            'request' => new Request(
+                [],
+                [],
+                ['_route_params' => ['id' => 5]],
+                [],
+                [],
+                [],
+                json_encode([
+                    'int' => 10,
+                    'string' => 'myText',
+                    'float' => 10.5,
+                    'bool' => false,
+                    'subObj' => [
+                        'test' => 'title',
+                    ],
+                ], JSON_THROW_ON_ERROR),
+            ),
+            'methodName' => 'resolverWithCustomMethodValidationAction',
+            'expectedOutput' => [
+                'int' => 10,
+                'string' => 'myText',
+                'float' => 10.5,
+                'bool' => false,
+                'subObj' => [
+                    'test' => 'title',
+                ],
+            ],
+        ];
     }
 }

@@ -7,6 +7,7 @@ namespace Zajca\Extensions\Tests\RequestMapping\ArgumentValueResolver\Example;
 use Zajca\Extensions\RequestMapping\Domain\Attribute\QueryString;
 use Zajca\Extensions\RequestMapping\Domain\RequestObject\Attribute\ResolveClass;
 use Zajca\Extensions\Tests\RequestMapping\Stubs\ClassAnnotation;
+use Zajca\Extensions\Tests\RequestMapping\Stubs\ClassAnnotationWithCustomMethodValidation;
 use Zajca\Extensions\Tests\RequestMapping\Stubs\ClassPropsAnnotation;
 use Zajca\Extensions\Tests\RequestMapping\Stubs\ClassPropsRenameAnnotation;
 use Zajca\Extensions\Tests\RequestMapping\Stubs\ClassPropsRenameAnnotationWithCustomMapping;
@@ -57,5 +58,9 @@ class ControllerStub
     public function resolverArgumentAttrAction(
         #[ResolveClass(Resolver::class, Preflight::class)] #[QueryString] WithPreflightInterface $reqObj
     ): void {
+    }
+
+    public function resolverWithCustomMethodValidationAction(ClassAnnotationWithCustomMethodValidation $reqObj): void
+    {
     }
 }
